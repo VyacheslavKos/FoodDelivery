@@ -1,0 +1,90 @@
+{% extends 'base_foo.html' %}
+
+{% block container %}
+
+   {% include 'top_menu.html' %}
+
+  <main class="container">
+    <h1 class="h3 my-4">Корзина</h1>
+    {% if not log %}
+      <div class="alert alert-warning" role="alert">Чтобы сделать заказ – <a href="{{ url_for('login') }}">войдите</a> или <a href="{{ url_for('register_') }}">зарегистрируйтесь</a></div>
+    {% endif %}
+    {% for msg in get_flashed_messages() %}
+      <div class="alert alert-warning" role="alert">{{ msg }}</div>
+    {% endfor %}
+
+    <div class="row mt-5">
+
+        {% if log and lst_meals|length > 0 %}
+        <div class="col-4">
+          <form action="{{ url_for('cart') }}" method='post'>
+          <h4 class="">Ваши данные</h4>
+            <div class="md-4 order-md-1">
+            {% if form.errors %}
+            <ul class="alert-warning">
+            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+            {% for error in field_errors %}
+                <li>{{ form[field_name].label }}: {{ error }}</li>
+            {% endfor %}
+            {% endfor %}
+            </ul>
+            {% endif %}
+               <div class=" md-4 order-md-1">
+                <div class="mt-3 mb-3">
+            {{ form.clientName.label(class_="md-4 form-label-group")}}
+            {{ form.clientName(class_="font-weight-bold form-control") }}
+                </div>
+               </div>
+               <div class=" md-4 order-md-1">
+                 <div class="mt-3 mb-3">
+            {{ form.clientAddress.label(class_="md-4 form-label-group")}}
+            {{ form.clientAddress(class_="font-weight-bold form-control") }}
+                 </div>
+               </div>
+               <div class=" md-4 order-md-1">
+                 <div class="mt-3 mb-3">
+            {{ form.clientPhone.label(class_="md-4 form-label-group")}}
+            {{ form.clientPhone(class_="font-weight-bold form-control") }}
+                 </div>
+               </div>
+            {{ form.order_summ(value=lst_meals|sum(attribute='price')) }}
+            {{ form.csrf_token }}
+            {{ form.submit(class_="mt-3 mb-3 btn btn-danger") }}
+            {% endif %}
+           </div>
+          </form>
+        </div>
+
+      <div class="col-1"></div>
+      <div class="col-7">
+          {% if lst_meals|length > 1 and lst_meals|length < 5 %}
+            <h4 class="mb-3 col-7 mb-5">{{ lst_meals|length }} блюда в корзине</h4>
+          {% elif lst_meals|length == 1 %}
+            <h4 class="mb-3 col-7 mb-5">{{ lst_meals|length }} блюдо в корзине</h4>
+          {% elif lst_meals|length == 0 %}
+            <h4 class="mb-3 col-7 mb-5">Корзина пуста</h4>
+          {% else %}
+            <h4 class="mb-3 col-7 mb-5">{{ lst_meals|length }} блюд в корзине</h4>
+          {% endif %}
+        <table class="table">
+          <tbody>
+          {% for meal in lst_meals %}
+            <tr>
+              <th scope="row">{{ meal.title }}</th>
+              <td></td>
+              <td>1</td>
+              <td>{{ meal.price }} руб</td>
+              <td><a class="text-danger" href="{{ url_for('delete_meal', meal_id=meal.id) }}">Удалить</a></td>
+            </tr>
+           {% endfor %}
+          </tbody>
+        </table>
+        <hr>
+          {% if lst_meals|length > 0 %}
+        <p class="display-4 my-2 ">{{ lst_meals|sum(attribute='price') }} руб</p>
+          {% endif %}
+      </div>
+    </div>
+  </main>
+
+{% endblock %}

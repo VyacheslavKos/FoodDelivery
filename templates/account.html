@@ -1,0 +1,38 @@
+{% extends 'base_foo.html' %}
+
+{% block container %}
+
+  {% include 'top_menu.html' %}
+
+  <main class="container">
+    <section class="row">
+      <div class="col-12 col-lg-8">
+        <h1 class="h3 my-5">Личный кабинет. Заказы</h1>
+        {% for order in user_orders|sort(attribute='id', reverse=True) %}
+        <div class="mt-4 card">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <div class="row">
+                <div class="col-7 col-lg-9">
+                  <span class="h5 font-weight-bold">{{ order.date }}</span>
+                  <span class="h5">- {{ order.sum }} руб</span>
+                </div>
+              </div>
+            </li>
+              <div class="card-body">
+                <div class="row">
+                {% for meal in order.meals %}
+                <p class="col-4 text-muted">{{ meal.meals.title }}</p>
+                <p class="col-2 text-muted">{{ meal.meal_amount }}</p>
+                <p class="col-6 text-muted">{{ meal.meal_sum }} руб</p>
+                {% endfor %}
+                </div>
+              </div>
+          </ul>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+
+{% endblock %}

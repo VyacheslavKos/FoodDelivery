@@ -1,0 +1,19 @@
+  <header class="container mt-3">
+    <nav class="py-1 navbar navbar-dark bg-dark">
+      <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+          <a class="navbar-brand" href="{{ url_for('main') }}"><p class="h5 my-1 text-white bg-dark">Stepik Delivery</p></a>
+      </ul>
+        {% if lst_meals|length > 1 and lst_meals|length < 5 %}
+            <a class="nav-link" href="{{ url_for('cart') }}"><p class="my-1 text-white bg-dark">Корзина: {{ lst_meals|length }} блюда, {{ lst_meals|sum(attribute='price') }} руб</p></a>
+        {% elif lst_meals|length == 1 %}
+            <a class="nav-link" href="{{ url_for('cart') }}"><p class="my-1 text-white bg-dark">Корзина: {{ lst_meals|length }} блюдо, {{ lst_meals|sum(attribute='price') }} руб</p></a>
+        {% else %}
+            <a class="nav-link" href="{{ url_for('cart') }}"><p class="my-1 text-white bg-dark">Корзина: {{ lst_meals|length }} блюд, {{ lst_meals|sum(attribute='price') }} руб</p></a>
+        {% endif %}
+        {% if log %}
+            <a href="{{ url_for('logout') }}" class="btn btn-light btn-sm ml-4s">Выйти</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="btn btn-light btn-sm ml-4s">Войти</a>
+        {% endif %}
+    </nav>
+  </header>
