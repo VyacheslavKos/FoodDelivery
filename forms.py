@@ -1,13 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField
-from wtforms import PasswordField
-from wtforms import SubmitField
-from wtforms import HiddenField
-from wtforms.validators import DataRequired
-from wtforms.validators import Length
-from wtforms.validators import EqualTo
-from wtforms.validators import InputRequired
-from wtforms.validators import Email
+from wtforms import StringField, PasswordField, SubmitField, HiddenField
+from wtforms.validators import DataRequired, Length, EqualTo, InputRequired, Email
 
 
 class OrderForm(FlaskForm):

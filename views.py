@@ -1,26 +1,25 @@
 import datetime
 
 from functools import wraps
-
+from flask import flash, session, redirect, request, render_template, url_for
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from flask import flash
-from flask import session
-from flask import redirect
-from flask import request
-from flask import render_template
-from flask import url_for
 
-from app import app
-from models import *
-from forms import *
+from app import app, db
+from models import OrdersMeals, User, Order, Meal, Category, LoginMixin
+from forms import OrderForm, LoginForm, RegistrationForm
+
+
+class SecureModelView(ModelView, LoginMixin):
+    pass
+
 
 admin = Admin(app)
 
-admin.add_view(ModelView(User, db.session))
-admin.add_view(ModelView(Order, db.session))
-admin.add_view(ModelView(Meal, db.session))
-admin.add_view(ModelView(Category, db.session))
+admin.add_view(SecureModelView(User, db.session))
+admin.add_view(SecureModelView(Order, db.session))
+admin.add_view(SecureModelView(Meal, db.session))
+admin.add_view(SecureModelView(Category, db.session))
 
 
 # Декоратор авторизации

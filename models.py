@@ -1,10 +1,19 @@
 from flask_sqlalchemy import SQLAlchemy
-
-from werkzeug.security import generate_password_hash
-from werkzeug.security import check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask import redirect, url_for, session
 
 
 db = SQLAlchemy()
+
+
+class LoginMixin:
+
+    def is_accessible(self):
+        return bool(session.get('user_id'))
+
+    def inaccessible_callback(self, name, **kwargs):
+        # redirect to login page if user doesn't have access
+        return redirect(url_for('login'))
 
 
 class OrdersMeals(db.Model):

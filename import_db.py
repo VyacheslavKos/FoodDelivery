@@ -1,9 +1,9 @@
 import csv
 
 from flask import Flask
+
 from config import Config
-from models import Category
-from models import Meal
+from models import Category, Meal
 from app import db
 
 
