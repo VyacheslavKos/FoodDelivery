@@ -19,9 +19,9 @@
               <h4 class="h5 card-title">{{ meal.title }}</h4>
               <p class="card-text">{{ meal.description }}</p>
               </div>
-              <footer class="card border-0 p-3">
-              <a href="{{ url_for('addtocart', meal_id=meal.id) }}" class="btn btn-danger btn-lg">{{ meal.price }} руб</a>
-              </footer>
+              <div class="card-footer border-0 bg-transparent p-3">
+              <a href="{{ url_for('addtocart', meal_id=meal.id) }}" class="btn btn-danger btn-lg btn-block">{{ meal.price }} руб</a>
+              </div>
           </div>
         {% endfor %}
       </div>
