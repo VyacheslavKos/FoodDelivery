@@ -1,40 +1,25 @@
 import datetime
 
-from functools import wraps
 from flask import flash, session, redirect, request, render_template, url_for
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
 from app import app, db
-from models import OrdersMeals, User, Order, Meal, Category, LoginMixin
+from models import OrdersMeals, User, Order, Meal, Category
 from forms import OrderForm, LoginForm, RegistrationForm
-
-
-class SecureModelView(ModelView, LoginMixin):
-    pass
 
 
 admin = Admin(app)
 
-admin.add_view(SecureModelView(User, db.session))
-admin.add_view(SecureModelView(Order, db.session))
-admin.add_view(SecureModelView(Meal, db.session))
-admin.add_view(SecureModelView(Category, db.session))
+admin.add_view(ModelView(User, db.session))
+admin.add_view(ModelView(Order, db.session))
+admin.add_view(ModelView(Meal, db.session))
+admin.add_view(ModelView(Category, db.session))
 
 
-# Декоратор авторизации
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        print("Нужно авторизоваться!")
-        if not session.get('user_id'):
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated_function
-
-
+# Декоратор контроля доступа к админке только зарегистрированным пользователям
 @app.before_request
-def before_request_func():
+def before_request():
     if request.endpoint == 'admin' and not session.get('user_id'):
         return redirect(url_for('login'))
 
@@ -49,10 +34,13 @@ def cart_meals(meals):
     return lst_meals
 
 
+# Главная страница
 @app.route('/')
 def main():
     cat_meals = {}
     lst_meals = cart_meals(session.get('cart', []))
+
+# Формирование списка случайных блюд, состоящего из 3х блюд, для каждой категории
     categories = Category.query.all()
     for category in categories:
         list_meal = []
@@ -61,9 +49,11 @@ def main():
             if len(list_meal) < 3:
                 list_meal.append(meal)
         cat_meals[category.title] = list_meal
+
     return render_template('main.html', cat_meals=cat_meals, log=session.get('user_id', []), lst_meals=lst_meals)
 
 
+# Представление для добавления блюда в корзину
 @app.route('/addtocart/<int:meal_id>/')
 def addtocart(meal_id):
     crt = session.get('cart', [])
@@ -72,6 +62,7 @@ def addtocart(meal_id):
     return redirect(url_for('main'))
 
 
+# Корзина
 @app.route('/cart/', methods=["GET", "POST"])
 def cart():
     form = OrderForm()
@@ -82,6 +73,7 @@ def cart():
                 form.errors.append("Не все поля заполнены корректно!")
                 return render_template('cart.html', form=form, log=session.get('user_id'), lst_meals=lst_meals)
 
+# Добавляем заказ в базу данных на основании данных из формы
             user = User.query.get(session.get("user_id"))
             order = Order(date=datetime.datetime.today().strftime('%H:%M %d-%m-%Y'),
                           sum=form.order_summ.data,
@@ -91,6 +83,7 @@ def cart():
                           address=form.clientAddress.data)
             db.session.add(order)
 
+# Добавляем данные в ассоциативную таблицу orders_meals
             meals = []
             for meal_id in session.get('cart'):
                 if meal_id not in meals:
@@ -109,6 +102,7 @@ def cart():
     return render_template('cart.html', form=form, log=session.get('user_id', []), lst_meals=lst_meals)
 
 
+# Представление для удаления блюда из корзины
 @app.route('/delete/<int:meal_id>/')
 def delete_meal(meal_id):
     crt = session.get('cart')
@@ -119,6 +113,7 @@ def delete_meal(meal_id):
     return redirect(url_for('cart'))
 
 
+# Регистрация нового клиента
 @app.route('/register/', methods=["GET", "POST"])
 def register_():
     if session.get('user_id'):
@@ -128,19 +123,25 @@ def register_():
         if not form.validate_on_submit():
             return render_template("register.html", form=form)
         user = User.query.filter_by(mail=form.mail.data).first()
+
+# Проверка на наличие клиента в базе данных
         if user:
             form.mail.errors.append("Пользователь с таким логином уже существует!")
             return render_template("register.html", form=form)
+
+# Добавление нового клиента в базу данных
         user = User()
         user.mail = form.mail.data
         user.password_set(form.password.data)
         db.session.add(user)
         db.session.commit()
         flash(f"Пользователь {form.mail.data} успешно зарегистрирован!")
+
         return redirect(url_for('register_'))
     return render_template("register.html", form=form)
 
 
+# Аутентификация зарегистрированного клиента
 @app.route('/login/', methods=["GET", "POST"])
 def login():
     if session.get('user_id'):
@@ -149,6 +150,8 @@ def login():
     if request.method == "POST":
         if not form.validate_on_submit():
             return render_template("login.html", form=form)
+
+# Верификация клиента на логин и пароль в базе данных
         user = User.query.filter_by(mail=form.mail.data).first()
         if not user:
             form.mail.errors.append("Несуществующий логин")
@@ -157,22 +160,25 @@ def login():
         else:
             session["user_id"] = user.id
             return redirect(url_for('account'))
+
     return render_template("login.html", form=form)
 
 
+# Представление для выхода из учетки
 @app.route('/logout/')
-@login_required
 def logout():
     session.clear()
     return redirect(url_for('main'))
 
 
+# Представление на подтверждение успешного оформления заказа
 @app.route('/ordered/')
 def ordered():
     session.pop('cart')
     return render_template('ordered.html')
 
 
+# Личный кабинет клиента
 @app.route('/account/')
 def account():
     lst_meals = cart_meals(session.get('cart', []))
