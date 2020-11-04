@@ -11,18 +11,18 @@
     {% for cat, meals in cat_meals.items() %}
     <section>
       <h3 class="my-4">{{ cat }}</h3>
-      <div class="row mt-4">
+      <div class="card-deck pb-4">
         {% for meal in meals %}
-        <div class="col-12 col-md-4">
-          <div class="card mb-3">
-            <img src="../static/pictures/{{ meal.picture }}" width="300" height="200" class="card-img-top" alt="">
+          <div class="card">
+            <img src="../static/pictures/{{ meal.picture }}" class="card-img-top" width="300" height="200">
             <div class="card-body">
               <h4 class="h5 card-title">{{ meal.title }}</h4>
               <p class="card-text">{{ meal.description }}</p>
+              </div>
+              <footer class="card border-0 p-3">
               <a href="{{ url_for('addtocart', meal_id=meal.id) }}" class="btn btn-danger btn-lg">{{ meal.price }} руб</a>
-            </div>
+              </footer>
           </div>
-        </div>
         {% endfor %}
       </div>
     </section>
