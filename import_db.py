@@ -31,7 +31,7 @@ def seed():
     for meal1 in meals:
         meal = Meal(
             title=meal1['title'],
-            price=float(meal1['price']),
+            price=int(meal1['price']),
             description=meal1['description'],
             picture=meal1['picture'],
             category_id=int(meal1['category_id'])
